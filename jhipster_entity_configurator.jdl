@@ -1,0 +1,157 @@
+/**Steps to generate gateway: 
+ 1. Put .yo-rc.json in gateway folder
+ 2. call Jhipster command
+ 3. npm install --save @types/enzyme
+ 4. npm install @types/history@4.7.3 --save-dev
+ 5. call mvnw (This is to confirm everything is fine)
+ 6. call jhipster import-jdl jhipster_entity_configurator.jdl
+ 7. call mvnw
+ 8. open new command windows and call npm test
+ 9. npm run e2e
+
+**/
+
+// ==============================
+// Entity definitions starts here
+// ==============================
+
+/** Profile of the user of the Solution this can be of any of the types :- Customer, Agent or Admin **/
+entity Profile {
+    profileID String
+    phoneNumber String
+    gender Gender
+    dateOfBirth LocalDate
+    address String
+    photo ImageBlob
+    bvn String
+    validID String
+}
+
+/** This defines different Profile Type - Customer, Agent or Admin **/
+entity ProfileType {
+    profiletypeID Long
+    profiletype String
+}
+// an ignored comment
+/** This setup different KYC Level a Customer can be in **/ 
+entity Kyclevel {
+	kycID Long
+	kyc String
+	description String
+	kycLevel Integer
+	phoneNumber Boolean
+	emailAddress Boolean
+	firstName Boolean
+	lastName Boolean
+	gender Boolean
+	dateofBirth Boolean
+	address Boolean
+	photoUpload Boolean 
+	verifiedBVN Boolean
+	verifiedValidID Boolean
+	evidenceofAddress Boolean
+	verificationofAddress Boolean
+	employmentDetails Boolean
+	dailyTransactionLimit Double
+	cumulativeBalanceLimit Double
+	paymentTransaction Boolean
+    billerTransaction Boolean
+}
+
+/** This setup different Billers in the system a Customer can be in **/ 
+entity Biller {
+	billerID Long
+    biller String
+    address String
+    phoneNumber String
+}
+
+entity WalletAccount {
+	accountNumber Long
+    currentBalance Double
+    dateOpened LocalDate
+}
+entity Scheme {
+	schemeID Long
+    scheme String
+}
+entity SchemeCategory {
+	schemecategoryID Long
+    schemeCategory String
+    description String
+}
+entity PaymentTransaction {
+  paymenttransID Long
+  transactionRef String
+  amount BigDecimal required
+  channel String required
+  currency String required
+  sourceAccount String required
+  sourceAccountBankCode String required
+  sourceAccountName String
+  sourceNarration String required
+  destinationAccount String required
+  destinationAccountBankCode String required
+  destinationAccountName String
+  destinationNarration String required
+}
+entity BillerTransaction {
+	billertransID Long
+    transactionRef String
+    narration String
+    amount Double
+}
+entity Customersubscription {
+	uniqueID String
+ 	frequency Frequency
+}
+entity BillerPlatform {
+	billerplatformID Long
+ 	billerPlatform String
+ 	amount Double
+}
+entity BillerCategory {
+	billercategoryID Long
+	billerCategory String
+}
+entity WalletAccountType {
+	accountypeID Long
+	walletAccountType String
+}
+enum Gender {
+	FEMALE, MALE
+}
+enum Frequency {
+	DAILY, WEEKLY, MONTHLY, ANNUALLY
+}
+relationship ManyToOne {
+    Profile{user(login)} to User
+    Profile{profileType} to ProfileType
+    Profile{kyc} to Kyclevel
+    Scheme{schemeCategory} to SchemeCategory
+    WalletAccount{scheme} to Scheme
+    WalletAccount{walletAccountType} to WalletAccountType
+}
+// defining multiple OneToMany relationships with comments
+relationship OneToMany {
+    Profile to WalletAccount{phoneNumber}
+    Profile to PaymentTransaction{phoneNumber}
+    Profile to BillerTransaction{phoneNumber}
+    Profile to Customersubscription{phoneNumber}
+    Biller to Customersubscription{biller}
+    BillerCategory to Biller{billerCategory}
+    Biller to BillerPlatform{biller}
+    
+}
+
+// =======
+// Options
+// =======
+// Set pagination options
+paginate PaymentTransaction,BillerTransaction,Profile with infinite-scroll
+paginate Biller with pagination
+dto * with mapstruct
+// Set service options to all 
+service all with serviceImpl
+// Set an angular suffix
+angularSuffix * with mySuffix
